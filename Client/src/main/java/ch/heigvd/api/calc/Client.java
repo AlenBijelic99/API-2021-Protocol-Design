@@ -1,7 +1,8 @@
 package ch.heigvd.api.calc;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,6 +35,45 @@ public class Client {
          */
 
         stdin = new BufferedReader(new InputStreamReader(System.in));
+
+        Socket clientSocket = null;
+        BufferedWriter out = null;
+        BufferedReader in = null;
+
+        try {
+            clientSocket = new Socket("localhost", 3101);
+            out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+            // ajouter le stin ici et boucler tant qu'on a pas reçu la réponse du serveur.
+
+            out.write(stdin.toString());
+            out.flush();
+
+            LOG.log(Level.INFO, "*** Response sent by the server: ***");
+            String line;
+            while ((line = in.readLine()) != null) {
+                LOG.log(Level.INFO, line);
+            }
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, ex.toString(), ex);
+        } finally {
+            try {
+                if (out != null) out.close();
+            } catch (IOException ex) {
+                LOG.log(Level.SEVERE, ex.toString(), ex);
+            }
+            try {
+                if (in != null) in.close();
+            } catch (IOException ex) {
+                LOG.log(Level.SEVERE, ex.toString(), ex);
+            }
+            try {
+                if (clientSocket != null && ! clientSocket.isClosed()) clientSocket.close();
+            } catch (IOException ex) {
+                LOG.log(Level.SEVERE, ex.toString(), ex);
+            }
+        }
 
     }
 }
