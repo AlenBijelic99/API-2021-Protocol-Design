@@ -21,7 +21,7 @@ public class ServerWorker implements Runnable {
      *
      * @param clientSocket connected to worker
      */
-    public ServerWorker(Socket clientSocket) throws IOException {
+    public ServerWorker(Socket clientSocket){
         // Log output on a single line
         System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s: %5$s%6$s%n");
 

@@ -17,7 +17,7 @@ public class Server {
     /**
      * Main function to start the server
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
         // Log output on a single line
         System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s: %5$s%6$s%n");
 
@@ -27,7 +27,7 @@ public class Server {
     /**
      * Start the server on a listening socket.
      */
-    private void start() throws IOException {
+    private void start(){
 
         LOG.info("Starting server...");
 
