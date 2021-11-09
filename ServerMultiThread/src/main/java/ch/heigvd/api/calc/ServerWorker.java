@@ -12,21 +12,26 @@ import java.util.logging.Logger;
 public class ServerWorker implements Runnable {
 
     private final static Logger LOG = Logger.getLogger(ServerWorker.class.getName());
+    private Socket clientSocket;
+    private BufferedReader reader = null;
+    private BufferedWriter writer = null;
 
     /**
      * Instantiation of a new worker mapped to a socket
      *
      * @param clientSocket connected to worker
      */
-    public ServerWorker(Socket clientSocket) {
+    public ServerWorker(Socket clientSocket){
         // Log output on a single line
         System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s: %5$s%6$s%n");
 
-        /* TODO: prepare everything for the ServerWorker to run when the
-         *   server calls the ServerWorker.run method.
-         *   Don't call the ServerWorker.run method here. It has to be called from the Server.
-         */
-
+        try {
+            this.clientSocket = clientSocket;
+            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+            writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"));
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, e.toString(), e);
+        }
     }
 
     /**
@@ -35,15 +40,67 @@ public class ServerWorker implements Runnable {
     @Override
     public void run() {
 
-        /* TODO: implement the handling of a client connection according to the specification.
-         *   The server has to do the following:
-         *   - initialize the dialog according to the specification (for example send the list
-         *     of possible commands)
-         *   - In a loop:
-         *     - Read a message from the input stream (using BufferedReader.readLine)
-         *     - Handle the message
-         *     - Send to result to the client
-         */
+        try {
+            writer.write("Vous pouvez effectuer les opérations suivantes +, -, *, /, %, ^ entre deux nombres.");
+            writer.flush();
+
+            while (!clientSocket.isClosed()) {
+                while (true) {
+                    String input = reader.readLine();
+                    if (input.isEmpty()) {
+                        writer.write("Vous pouvez effectuer les opérations suivantes +, -, *, /, %, ^ entre deux nombres.");
+                        writer.flush();
+                    }
+                    if (input.equals("Bye")) {
+                        break;
+                    }
+                    input = input.trim();
+                    String[] newInput = input.split("\\s+");
+                    int a = Integer.parseInt(newInput[0]);
+                    int b = Integer.parseInt(newInput[2]);
+                    switch (newInput[1]) {
+                        case "+":
+                            writer.write(a + b);
+                            writer.flush();
+                            break;
+                        case "-":
+                            writer.write(a - b);
+                            writer.flush();
+                            break;
+                        case "*":
+                            writer.write(a * b);
+                            writer.flush();
+                            break;
+                        case "/":
+                            if (b != 0) {
+                                writer.write(a / b);
+
+                            } else {
+                                writer.write("Undefined");
+                            }
+                            writer.flush();
+                            break;
+                        case "%":
+                            if (b != 0) {
+                                writer.write(a % b);
+                            } else {
+                                writer.write("Undefined");
+                            }
+                            writer.flush();
+                            break;
+                        case "^":
+                            writer.write((int) Math.pow(a, b));
+                            writer.flush();
+                            break;
+                    }
+                }
+                clientSocket.close();
+                writer.close();
+                reader.close();
+            }
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, e.toString(), e);
+        }
 
     }
 }
