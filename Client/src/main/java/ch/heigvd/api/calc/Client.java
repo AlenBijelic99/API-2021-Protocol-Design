@@ -1,8 +1,10 @@
 package ch.heigvd.api.calc;
 
+import java.awt.print.PrinterAbortException;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,33 +36,52 @@ public class Client {
          *     - read the response line from the server (using BufferedReader.readLine)
          */
 
-        stdin = new BufferedReader(new InputStreamReader(System.in));
 
         Socket clientSocket = null;
         BufferedWriter out = null;
         BufferedReader in = null;
 
         try {
-            clientSocket = new Socket("localhost", 3101);
+            clientSocket = new Socket("localhost", 2424);
             out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            // ajouter le stin ici et boucler tant qu'on a pas reçu la réponse du serveur.
+            String readline = "";
+            String line;
+            stdin = new BufferedReader(new InputStreamReader(System.in));
 
-            out.write(stdin.toString());
+            readline = stdin.readLine().trim();
+            out.write(readline);
             out.flush();
 
+
+            while((line = in.readLine()) != null){
+                    System.out.println(line);
+            }
+            /*
+            while(true){
+                stdin = new BufferedReader(new InputStreamReader(System.in));
+                if((readline = stdin.readLine()) != null){
+                    //out.println(readline.trim());
+                    out.write(readline.trim());
+                    out.flush();
+                }
+            }
+            */
+
+            /*
             LOG.log(Level.INFO, "*** Response sent by the server: ***");
             String line;
             while ((line = in.readLine()) != null) {
                 LOG.log(Level.INFO, line);
-            }
+            }*/
+
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, ex.toString(), ex);
         } finally {
             try {
                 if (out != null) out.close();
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 LOG.log(Level.SEVERE, ex.toString(), ex);
             }
             try {
